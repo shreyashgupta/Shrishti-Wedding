@@ -12,7 +12,7 @@ async function fetchImages() {
     const folder = document.getElementById("folder").value;
     const onlySelected = document.getElementById("selectedFilter").checked;
 
-    let url = `${api}/images?page=${currentPage}&limit=20&folder=${folder}`;
+    let url = `${api}/images?page=${currentPage}&limit=10&folder=${folder}`;
     if (onlySelected) url += "&selected=true";
 
     const response = await fetch(url);
