@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Gallery</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Shrishti Wedding</h1>
+
+        <div class="filters">
+            <select id="folder" onchange="folderToggle()">
+                <option value="">All Folders</option>
+            </select>
+            <label>
+                <input type="checkbox" id="selectedFilter" onchange="fetchImages()"> Show Only Selected
+            </label>
+        </div>
+
+        <div id="selectedCounters">
+            <span id="selectedCount">Selected (Page): 0</span>
+            <span id="totalSelectedCount">Total Selected: 0</span>
+        </div>
+
+        <div id="gallery" class="gallery"></div>
+
+        <div class="pagination">
+            <button onclick="prevPage()">⬅ Prev</button>
+            <span id="page-number">Page 1</span>
+            <button onclick="nextPage()">Next ➡</button>
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div id="lightbox" class="hidden">
+        <button id="prevBtn" class="nav-btn" onclick="prevImage()">⬅</button>
+        <img id="lightboxImage">
+        <button id="nextBtn" class="nav-btn" onclick="nextImage()">➡</button>
+    </div>
+
+
+    <script src="app.js"></script>
+</body>
+</html>
