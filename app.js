@@ -1,7 +1,7 @@
 let imagesList = [];
 let currentPage = 1;
 let filterSelected = false;
-let api = "https://shrishti-wedding-api.onrender.com/"
+let api = "https://shrishti-wedding-api.onrender.com"
 async function folderToggle() {
     currentPage=1
     document.getElementById("page-number").innerHTML = "Page " + currentPage;
