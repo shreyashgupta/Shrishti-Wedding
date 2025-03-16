@@ -60,7 +60,11 @@ async function fetchFolders() {
 }
 
 async function toggleSelection(index) {
-    await fetch(`${api}/select/${imagesList[index].id}`, { method: "POST" });
+    if(imagesList[index].is_selected){
+        await fetch(`${api}/deselect/${imagesList[index].id}`, { method: "POST" });
+    }else{
+        await fetch(`${api}/select/${imagesList[index].id}`, { method: "POST" });
+    }
     fetchImages();
 }
 
