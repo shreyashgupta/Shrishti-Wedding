@@ -1,7 +1,7 @@
 let imagesList = [];
 let currentPage = 1;
 let filterSelected = false;
-
+let api = "https://shrishti-wedding-api.onrender.com/"
 async function folderToggle() {
     currentPage=1
     document.getElementById("page-number").innerHTML = "Page " + currentPage;
@@ -12,7 +12,7 @@ async function fetchImages() {
     const folder = document.getElementById("folder").value;
     const onlySelected = document.getElementById("selectedFilter").checked;
 
-    let url = `http://127.0.0.1:8000/images?page=${currentPage}&limit=20&folder=${folder}`;
+    let url = `${api}/images?page=${currentPage}&limit=20&folder=${folder}`;
     if (onlySelected) url += "&selected=true";
 
     const response = await fetch(url);
@@ -47,7 +47,7 @@ async function fetchImages() {
 }
 
 async function fetchFolders() {
-    const response = await fetch("http://127.0.0.1:8000/folders");
+    const response = await fetch(`${api}/folders`);
     const folders = await response.json();
     const folderSelect = document.getElementById("folder");
 
@@ -60,7 +60,7 @@ async function fetchFolders() {
 }
 
 async function toggleSelection(index) {
-    await fetch(`http://127.0.0.1:8000/select/${imagesList[index].id}`, { method: "POST" });
+    await fetch(`${api}/select/${imagesList[index].id}`, { method: "POST" });
     fetchImages();
 }
 
@@ -109,7 +109,7 @@ function nextImage() {
     updateLightboxImage();
 }
 async function fetchTotalSelectedCount() {
-    const response = await fetch("http://127.0.0.1:8000/selected_count");
+    const response = await fetch(`${api}/selected_count`);
     const data = await response.json();
     document.getElementById("totalSelectedCount").innerText = `Total Selected: ${data.total_selected}`;
 }
