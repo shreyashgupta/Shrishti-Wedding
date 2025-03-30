@@ -8,11 +8,18 @@ async function folderToggle() {
     fetchImages()
 }
 
+function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+}
+
+const userType = getQueryParam("user_type") || "bride"; 
+
 async function fetchImages() {
     const folder = document.getElementById("folder").value;
     const onlySelected = document.getElementById("selectedFilter").checked;
 
-    let url = `${api}/images?page=${currentPage}&limit=10&folder=${folder}`;
+    let url = `${api}/images?page=${currentPage}&limit=10&folder=${folder}&user_type=${userType}`;
     if (onlySelected) url += "&selected=true";
 
     const response = await fetch(url);
@@ -61,9 +68,9 @@ async function fetchFolders() {
 
 async function toggleSelection(index) {
     if(imagesList[index].is_selected){
-        await fetch(`${api}/deselect/${imagesList[index].id}`, { method: "POST" });
+        await fetch(`${api}/deselect/${imagesList[index].id}?user_type=${userType}`, { method: "POST" });
     }else{
-        await fetch(`${api}/select/${imagesList[index].id}`, { method: "POST" });
+        await fetch(`${api}/select/${imagesList[index].id}?user_type=${userType}`, { method: "POST" });
     }
     fetchImages();
 }
@@ -113,7 +120,7 @@ function nextImage() {
     updateLightboxImage();
 }
 async function fetchTotalSelectedCount() {
-    const response = await fetch(`${api}/selected_count`);
+    const response = await fetch(`${api}/selected_count?user_type=${userType}`);
     const data = await response.json();
     document.getElementById("totalSelectedCount").innerText = `Total Selected: ${data.total_selected}`;
 }
