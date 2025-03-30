@@ -14,6 +14,10 @@ function getQueryParam(param) {
 }
 
 const userType = getQueryParam("user_type") || "bride"; 
+if(userType=="bride")
+    document.getElementById("title").innerHTML = "Shrishti Wedding"
+else
+    document.getElementById("title").innerHTML = "Ankur Wedding"
 
 async function fetchImages() {
     const folder = document.getElementById("folder").value;
