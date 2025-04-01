@@ -137,6 +137,11 @@ async function updateSelectedCount() {
     const response = await fetch(`${api}/selected_count?user_type=${userType}`);
     const data = await response.json();
     document.getElementById("totalSelectedCount").innerText = `Total Selected: ${data.total_selected}`;
+    const folder = document.getElementById("folder").value;
+    
+    const folder_response = await fetch(`${api}/selected_count?user_type=${userType}?folder=${folder}`);
+    const folder_data = await response.json();
+    document.getElementById("folderSelectedCount").innerText = `Selected in Folder: ${folder_data.total_selected}`;
 }
 
 // Open Lightbox
