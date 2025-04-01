@@ -26,7 +26,6 @@ async function fetchImages() {
 
     let url = `${api}/images?page=${currentPage}&limit=10&folder=${folder}&user_type=${userType}`;
     if (onlySelected) url += "&selected=true";
-    console.log(url)
     const response = await fetch(url);
     const newImages = await response.json();
 
@@ -94,6 +93,7 @@ async function folderToggle() {
     imagesList = []; // Clear image list
     document.getElementById("gallery").innerHTML = ""; // Clear the gallery
     fetchImages(); // Fetch new images
+    updateSelectedCount();
 }
 
 async function toggleFilter() {
@@ -139,7 +139,7 @@ async function updateSelectedCount() {
     document.getElementById("totalSelectedCount").innerText = `Total Selected: ${data.total_selected}`;
     const folder = document.getElementById("folder").value;
     
-    const folder_response = await fetch(`${api}/selected_count?user_type=${userType}?folder=${folder}`);
+    const folder_response = await fetch(`${api}/selected_count?user_type=${userType}&folder=${folder}`);
     const folder_data = await folder_response.json();
     document.getElementById("folderSelectedCount").innerText = `Selected in Folder: ${folder_data.total_selected}`;
 }
