@@ -128,3 +128,14 @@ button {
 #lightbox.hidden {
     display: none;
 }
+
+#loading {
+    text-align: center;
+    font-size: 16px;
+    color: #555;
+    padding: 20px;
+}
+
+.hidden {
+    display: none;
+}

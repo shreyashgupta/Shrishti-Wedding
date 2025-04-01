@@ -1,62 +1,80 @@
 let imagesList = [];
 let currentPage = 1;
+let isLoading = false; // Prevent duplicate requests
+let allImagesLoaded = false; // Stop fetching when no more images
 let filterSelected = false;
 let api = "https://shrishti-wedding-api.onrender.com"
-async function folderToggle() {
-    currentPage=1
-    document.getElementById("page-number").innerHTML = "Page " + currentPage;
-    fetchImages()
-}
 
+// Detect user type from URL
 function getQueryParam(param) {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get(param);
 }
 
-const userType = getQueryParam("user_type") || "bride"; 
-if(userType=="bride")
-    document.getElementById("title").innerHTML = "Shrishti Wedding"
-else
-    document.getElementById("title").innerHTML = "Ankur Wedding"
+const userType = getQueryParam("user_type") || "bride";
+document.getElementById("title").innerHTML = userType === "bride" ? "Shrishti Wedding" : "Ankur Wedding";
 
+// Function to load images when scrolling
 async function fetchImages() {
+    if (isLoading || allImagesLoaded) return;
+
+    isLoading = true;
+    document.getElementById("loading").classList.remove("hidden"); // Show loading
+
     const folder = document.getElementById("folder").value;
     const onlySelected = document.getElementById("selectedFilter").checked;
 
     let url = `${api}/images?page=${currentPage}&limit=10&folder=${folder}&user_type=${userType}`;
     if (onlySelected) url += "&selected=true";
-
+    console.log(url)
     const response = await fetch(url);
-    imagesList = await response.json();
+    const newImages = await response.json();
 
+    if (newImages.length === 0) {
+        allImagesLoaded = true; // Stop further requests if no images are returned
+    } else {
+        imagesList = [...imagesList, ...newImages]; // Append new images
+        renderGallery(newImages);
+        currentPage++; // Increment page
+    }
+
+    isLoading = false;
+    document.getElementById("loading").classList.add("hidden"); // Hide loading
+}
+
+// Function to render images
+function renderGallery(newImages) {
     const gallery = document.getElementById("gallery");
-    gallery.innerHTML = "";
 
-    let selectedCount = 0;
-    imagesList.forEach((img, index) => {
-        if (img.is_selected) selectedCount++;
-
+    newImages.forEach((img, index) => {
         const container = document.createElement("div");
         container.classList.add("image-container");
 
         const imgElement = document.createElement("img");
         imgElement.src = img.link;
         imgElement.classList.toggle("selected", img.is_selected);
-        imgElement.onclick = () => openLightbox(index);
+        imgElement.onclick = () => openLightbox(imagesList.indexOf(img));
 
         const button = document.createElement("button");
         button.innerText = img.is_selected ? "Deselect" : "Select";
-        button.onclick = () => toggleSelection(index);
+        button.onclick = () => toggleSelection(imagesList.indexOf(img));
 
         container.appendChild(imgElement);
         container.appendChild(button);
         gallery.appendChild(container);
     });
 
-    document.getElementById("selectedCount").innerText = `Selected (Page): ${selectedCount}`;
-    fetchTotalSelectedCount();
+    updateSelectedCount();
 }
 
+// Scroll event listener
+window.addEventListener("scroll", () => {
+    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
+        fetchImages();
+    }
+});
+
+// Fetch folders
 async function fetchFolders() {
     const response = await fetch(`${api}/folders`);
     const folders = await response.json();
@@ -70,17 +88,56 @@ async function fetchFolders() {
     });
 }
 
-async function toggleSelection(index) {
-    if(imagesList[index].is_selected){
-        await fetch(`${api}/deselect/${imagesList[index].id}?user_type=${userType}`, { method: "POST" });
-    }else{
-        await fetch(`${api}/select/${imagesList[index].id}?user_type=${userType}`, { method: "POST" });
-    }
-    fetchImages();
+async function folderToggle() {
+    currentPage = 1;
+    allImagesLoaded = false; // Reset loading flag
+    imagesList = []; // Clear image list
+    document.getElementById("gallery").innerHTML = ""; // Clear the gallery
+    fetchImages(); // Fetch new images
 }
 
-let currentIndex = 0;
-let filteredImages = [];
+async function toggleFilter() {
+    currentPage = 1;
+    allImagesLoaded = false; // Reset loading flag
+    imagesList = []; // Clear image list
+    document.getElementById("gallery").innerHTML = ""; // Clear the gallery
+    fetchImages(); // Fetch new images
+}
+
+async function toggleSelection(index) {
+    const image = imagesList[index];
+
+    // Show loading indicator on the button
+    const button = document.querySelectorAll(".image-container button")[index];
+    button.innerText = "Processing...";
+    button.disabled = true;
+
+    // API call to update selection
+    const endpoint = image.is_selected ? "deselect" : "select";
+    await fetch(`${api}/${endpoint}/${image.id}?user_type=${userType}`, { method: "POST" });
+
+    // Toggle selection state
+    image.is_selected = !image.is_selected;
+
+    // Update UI instantly
+    const imgElement = document.querySelectorAll(".image-container img")[index];
+    imgElement.classList.toggle("selected", image.is_selected);
+
+    // Restore button text
+    button.innerText = image.is_selected ? "Deselect" : "Select";
+    button.disabled = false;
+
+    // Update selected counts
+    updateSelectedCount();
+}
+
+
+// Update selected count
+async function updateSelectedCount() {
+    const response = await fetch(`${api}/selected_count?user_type=${userType}`);
+    const data = await response.json();
+    document.getElementById("totalSelectedCount").innerText = `Total Selected: ${data.total_selected}`;
+}
 
 // Open Lightbox
 function openLightbox(index) {
@@ -90,7 +147,7 @@ function openLightbox(index) {
     document.getElementById("lightbox").classList.remove("hidden");
 }
 
-// Close Lightbox when clicking anywhere
+// Close Lightbox
 document.getElementById("lightboxImage").addEventListener("click", closeLightbox);
 
 function closeLightbox() {
@@ -104,45 +161,17 @@ function updateLightboxImage() {
     }
 }
 
-// Navigate to Previous Image
+// Navigate Images in Lightbox
 function prevImage() {
-    if (currentIndex > 0) {
-        currentIndex--;
-    } else {
-        currentIndex = filteredImages.length - 1; // Loop to last image
-    }
+    currentIndex = (currentIndex > 0) ? currentIndex - 1 : filteredImages.length - 1;
     updateLightboxImage();
 }
 
-// Navigate to Next Image
 function nextImage() {
-    if (currentIndex < filteredImages.length - 1) {
-        currentIndex++;
-    } else {
-        currentIndex = 0; // Loop to first image
-    }
+    currentIndex = (currentIndex < filteredImages.length - 1) ? currentIndex + 1 : 0;
     updateLightboxImage();
 }
-async function fetchTotalSelectedCount() {
-    const response = await fetch(`${api}/selected_count?user_type=${userType}`);
-    const data = await response.json();
-    document.getElementById("totalSelectedCount").innerText = `Total Selected: ${data.total_selected}`;
-}
 
-function nextPage() {
-    currentPage++;
-    fetchImages();
-    document.getElementById("page-number").innerHTML = "Page " + currentPage;
-    
-}
-
-function prevPage() {
-    if (currentPage > 1) {
-        currentPage--;
-        fetchImages();
-        document.getElementById("page-number").innerHTML = "Page " + currentPage;
-    }
-}
-
+// Initial Load
 fetchFolders().then(fetchImages);
-fetchTotalSelectedCount();
+updateSelectedCount();

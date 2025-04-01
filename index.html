@@ -15,22 +15,16 @@
                 <option value="">All Folders</option>
             </select>
             <label>
-                <input type="checkbox" id="selectedFilter" onchange="fetchImages()"> Show Only Selected
+                <input type="checkbox" id="selectedFilter" onchange="toggleFilter()"> Show Only Selected
             </label>
         </div>
 
         <div id="selectedCounters">
-            <span id="selectedCount">Selected (Page): 0</span>
             <span id="totalSelectedCount">Total Selected: 0</span>
         </div>
 
         <div id="gallery" class="gallery"></div>
-
-        <div class="pagination">
-            <button onclick="prevPage()">⬅ Prev</button>
-            <span id="page-number">Page 1</span>
-            <button onclick="nextPage()">Next ➡</button>
-        </div>
+        <div id="loading" class="hidden">Loading more images...</div>
     </div>
 
     <!-- Lightbox -->
